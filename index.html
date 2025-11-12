@@ -1,205 +1,181 @@
 ﻿<!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>サービスについてのアンケート</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    body {
-      font-family: 'Yu Gothic', 'Noto Sans JP', sans-serif;
-      background-color: #f8f9fa;
-    }
-    .header-bg {
-      background-color: #007bff;
-      color: white;
-    }
-    .form-card {
-      background: white;
-      padding: 2rem;
-      border-radius: 15px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-      max-width: 600px;
-      margin: auto;
-    }
-    .text-error { color: #dc3545; font-size: 0.875em; }
-    .text-unanswered { color: #dc3545; font-weight: bold; margin-left: 0.5rem; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>サービスについてのアンケート</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+<style>
+body {
+  font-family: 'Yu Gothic', 'YuGothic', 'Noto Sans JP', sans-serif;
+  color: #333;
+  background-color: #f8f9fa;
+}
+.header-bg { background-color: #007bff; color: white; }
+.container-hero { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 5rem 0; }
+.form-card {
+  background-color: white; padding: 2rem; border-radius: 15px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); max-width: 600px; width: 100%;
+}
+.btn-pill { border-radius: 50rem; padding-left: 1.5rem; padding-right: 1.5rem; }
+.text-error { color: #dc3545; font-size: 0.875em; }
+</style>
 </head>
 <body>
-  <header class="header-bg py-3 sticky-top text-center">
-    <h4 class="mb-0">✨ サービスアンケート</h4>
-  </header>
 
-  <main class="container py-5">
-    <div class="form-card">
-      <form id="surveyForm" onsubmit="return validateAndSubmit(event);">
-        <!-- Q1 -->
-        <div class="mb-4">
-          <label for="q1_visit_date" class="form-label fw-bold">
-            Q1. ご来店日 <span class="text-error">*必須</span><span id="q1_unanswered" class="text-unanswered d-none">未回答</span>
-          </label>
-          <input type="date" class="form-control" id="q1_visit_date">
-          <div id="q1_error" class="text-error mt-1 d-none">ご来店日を選択してください。</div>
-        </div>
+<header class="header-bg py-3 sticky-top text-center">
+  <div class="h4 mb-0">✨ サービスアンケート</div>
+</header>
 
-        <!-- Q2 -->
-        <div class="mb-4">
-          <label class="form-label fw-bold">
-            Q2. ご年齢 <span class="text-error">*必須</span><span id="q2_unanswered" class="text-unanswered d-none">未回答</span>
-          </label>
-          <div>
-            <label><input type="radio" name="q2_age" value="10代">10代</label>
-            <label><input type="radio" name="q2_age" value="20代">20代</label>
-            <label><input type="radio" name="q2_age" value="30代">30代</label>
-            <label><input type="radio" name="q2_age" value="40代">40代</label>
-            <label><input type="radio" name="q2_age" value="50代">50代</label>
-          </div>
-          <div id="q2_error" class="text-error mt-1 d-none">ご年齢を選択してください。</div>
-        </div>
+<main class="container-hero">
+  <div class="form-card">
+    <h2 class="text-center mb-4" style="color:#007bff;">サービスについてのアンケート</h2>
+    <form id="surveyForm" onsubmit="return submitSurvey(event)">
+      
+      <div class="mb-4">
+        <label for="q1_visit_date" class="form-label fw-bold">Q1. ご来店日はいつですか <span class="text-error">*必須</span></label>
+        <input type="date" class="form-control" id="q1_visit_date" required>
+      </div>
 
-        <!-- Q3 -->
-        <div class="mb-4">
-          <label class="form-label fw-bold">
-            Q3. サービスを知ったきっかけ（複数可）<span class="text-error">*必須</span><span id="q3_unanswered" class="text-unanswered d-none">未回答</span>
-          </label>
-          <div>
-            <label><input type="checkbox" name="q3_source" value="家族・友人">家族・友人</label>
-            <label><input type="checkbox" name="q3_source" value="TVCM">TVCM</label>
-            <label><input type="checkbox" name="q3_source" value="SNS">SNS</label>
-            <label><input type="checkbox" name="q3_source" value="街頭広告">街頭広告</label>
-            <label><input type="checkbox" name="q3_source" value="その他">その他</label>
-          </div>
-          <div id="q3_error" class="text-error mt-1 d-none">きっかけを一つ以上選択してください。</div>
+      <div class="mb-4">
+        <label class="form-label fw-bold">Q2. ご年齢 <span class="text-error">*必須</span></label>
+        <div class="d-flex flex-wrap">
+          <div class="form-check me-3"><input class="form-check-input" type="radio" name="q2_age" value="10代"><label class="form-check-label">10代</label></div>
+          <div class="form-check me-3"><input class="form-check-input" type="radio" name="q2_age" value="20代"><label class="form-check-label">20代</label></div>
+          <div class="form-check me-3"><input class="form-check-input" type="radio" name="q2_age" value="30代"><label class="form-check-label">30代</label></div>
+          <div class="form-check me-3"><input class="form-check-input" type="radio" name="q2_age" value="40代"><label class="form-check-label">40代</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q2_age" value="50代"><label class="form-check-label">50代</label></div>
         </div>
+      </div>
 
-        <!-- Q4 -->
-        <div class="mb-4">
-          <label class="form-label fw-bold">
-            Q4. サービス満足度（1～5）<span class="text-error">*必須</span><span id="q4_unanswered" class="text-unanswered d-none">未回答</span>
-          </label>
-          <div>
-            <label><input type="radio" name="q4_satisfaction" value="1">1😢</label>
-            <label><input type="radio" name="q4_satisfaction" value="2">2😅</label>
-            <label><input type="radio" name="q4_satisfaction" value="3">3😐</label>
-            <label><input type="radio" name="q4_satisfaction" value="4">4😀</label>
-            <label><input type="radio" name="q4_satisfaction" value="5">5😆</label>
-          </div>
-          <div id="q4_error" class="text-error mt-1 d-none">満足度を選択してください。</div>
+      <div class="mb-4">
+        <label class="form-label fw-bold">Q3. サービスを知ったきっかけ（複数回答可） <span class="text-error">*必須</span></label>
+        <div class="d-flex flex-column">
+          <label><input type="checkbox" name="q3_source" value="家族・友人"> 家族・友人</label>
+          <label><input type="checkbox" name="q3_source" value="TVCM"> TVCM</label>
+          <label><input type="checkbox" name="q3_source" value="SNS"> SNS</label>
+          <label><input type="checkbox" name="q3_source" value="街頭広告"> 街頭広告</label>
+          <label><input type="checkbox" name="q3_source" value="その他"> その他</label>
         </div>
+      </div>
 
-        <!-- Q5 -->
-        <div class="mb-4">
-          <label for="q5_comment" class="form-label fw-bold">Q5. ご意見・ご要望（任意）</label>
-          <textarea id="q5_comment" class="form-control"></textarea>
+      <div class="mb-4">
+        <label class="form-label fw-bold">Q4. サービスの満足度（1～5） <span class="text-error">*必須</span></label>
+        <div class="d-flex justify-content-between">
+          <label><input type="radio" name="q4_satisfaction" value="1">1😢</label>
+          <label><input type="radio" name="q4_satisfaction" value="2">2😅</label>
+          <label><input type="radio" name="q4_satisfaction" value="3">3😐</label>
+          <label><input type="radio" name="q4_satisfaction" value="4">4😀</label>
+          <label><input type="radio" name="q4_satisfaction" value="5">5😆</label>
         </div>
+      </div>
 
-        <div class="d-flex justify-content-between mt-4">
-          <button type="button" class="btn btn-outline-secondary" onclick="showBackConfirm()">戻る</button>
-          <button type="submit" class="btn btn-primary">回答</button>
-        </div>
-      </form>
-    </div>
-  </main>
+      <div class="mb-4">
+        <label for="q5_comment" class="form-label fw-bold">Q5. ご意見・ご要望（任意）</label>
+        <textarea class="form-control" id="q5_comment" rows="4"></textarea>
+      </div>
 
-  <!-- 完了モーダル -->
-  <div class="modal fade" id="completionModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header bg-success text-white"><h5>完了</h5></div>
-        <div class="modal-body text-center py-5">
-          <p class="h4 mb-4">ご回答ありがとうございました！</p>
-          <p>"終了"ボタンでブラウザを閉じてください。</p>
-          <button type="button" class="btn btn-primary" onclick="closeBrowser()">終了</button>
-        </div>
+      <div class="text-center">
+        <button type="button" class="btn btn-outline-secondary btn-pill me-2" onclick="confirmExit()">戻る</button>
+        <button type="submit" class="btn btn-primary btn-pill">回答</button>
+      </div>
+    </form>
+  </div>
+</main>
+
+<!-- 回答完了モーダル -->
+<div class="modal fade" id="completionModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white"><h5 class="modal-title">完了</h5></div>
+      <div class="modal-body text-center py-5">
+        <p class="h4 mb-4">ご回答ありがとうございました！</p>
+        <p>"終了"ボタンでブラウザを終了してください。</p>
+        <button type="button" class="btn btn-primary btn-pill mt-3" onclick="closeBrowser()">終了</button>
       </div>
     </div>
   </div>
+</div>
 
-  <!-- 戻る確認モーダル -->
-  <div class="modal fade" id="backModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header"><h5>確認</h5></div>
-        <div class="modal-body text-center"><p>回答内容が無効になります。よろしいですか？</p></div>
-        <div class="modal-footer justify-content-around">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">いいえ</button>
-          <button type="button" class="btn btn-danger" onclick="closeBrowser()">はい</button>
-        </div>
-      </div>
-    </div>
-  </div>
+<footer class="bg-dark text-white py-4 text-center mt-5">
+  <small>© 2025 Service Survey</small>
+</footer>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzbLbqwIO3JP4tYnYeZP48vLa806b9PQLcV0zofeg-bXAt9klVvGjsl5n-bPaPegqid/exec";
-    const params = new URLSearchParams(window.location.search);
-    const code = params.get("code") || location.search.replace("?", "");
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    // ▼ 起動時チェック：すでに「済」なら強制終了
-    window.onload = async function() {
-      if (!code) return;
-      const res = await fetch(SCRIPT_URL + "?check=" + code);
-      const text = await res.text();
-      if (text === "済") {
-        alert("既にアンケート回答済みの為、終了いたします。");
-        closeBrowser();
-      }
-    };
+<script>
+// --- Google Apps Script URL をここに貼ってください ---
+const GAS_URL = "https://script.google.com/macros/s/AKfycbzbLbqwIO3JP4tYnYeZP48vLa806b9PQLcV0zofeg-bXAt9klVvGjsl5n-bPaPegqid/exec";
 
-    // ▼ 戻る確認モーダル
-    function showBackConfirm() {
-      new bootstrap.Modal(document.getElementById('backModal')).show();
-    }
+// --- パラメータ取得（例：?12345） ---
+const code = window.location.search.replace("?", "") || "00000";
 
-    // ▼ 未回答検出・送信処理
-    async function validateAndSubmit(e) {
-      e.preventDefault();
-      const form = document.getElementById("surveyForm");
-      let hasError = false;
-      document.querySelectorAll(".text-error, .text-unanswered").forEach(el => el.classList.add("d-none"));
-      let firstError = null;
+// --- アクセス記録 ---
+window.onload = async function() {
+  let ip = "取得不可", lat = "", lon = "";
+  try {
+    const ipRes = await fetch("https://api.ipify.org?format=json");
+    ip = (await ipRes.json()).ip;
+  } catch(e){}
+  navigator.geolocation.getCurrentPosition(
+    pos => sendAccess(ip, pos.coords.latitude, pos.coords.longitude),
+    ()  => sendAccess(ip, lat, lon)
+  );
+};
 
-      const required = [
-        { id: "q1", check: () => !document.getElementById("q1_visit_date").value },
-        { id: "q2", check: () => !form.querySelector('input[name="q2_age"]:checked') },
-        { id: "q3", check: () => !form.querySelector('input[name="q3_source"]:checked') },
-        { id: "q4", check: () => !form.querySelector('input[name="q4_satisfaction"]:checked') },
-      ];
-      for (const q of required) {
-        if (q.check()) {
-          document.getElementById(q.id + "_error").classList.remove("d-none");
-          document.getElementById(q.id + "_unanswered").classList.remove("d-none");
-          if (!firstError) firstError = document.getElementById(q.id + "_error");
-          hasError = true;
-        }
-      }
-      if (hasError) {
-        firstError.scrollIntoView({ behavior: "smooth", block: "center" });
-        return false;
-      }
+function sendAccess(ip, lat, lon) {
+  fetch(GAS_URL, {
+    method: "POST",
+    body: JSON.stringify({
+      type: "access",
+      code: code,
+      ip: ip,
+      lat: lat,
+      lon: lon,
+      device: navigator.userAgent
+    })
+  });
+}
 
-      // データ送信
-      const data = {
-        type: "answer",
-        code: code,
-        q1_visit_date: document.getElementById("q1_visit_date").value,
-        q2_age: form.querySelector('input[name="q2_age"]:checked').value,
-        q3_source: Array.from(form.querySelectorAll('input[name="q3_source"]:checked')).map(el => el.value),
-        q4_satisfaction: form.querySelector('input[name="q4_satisfaction"]:checked').value,
-        q5_comment: document.getElementById("q5_comment").value
-      };
+// --- 回答処理 ---
+async function submitSurvey(event) {
+  event.preventDefault();
+  const form = event.target;
 
-      await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(data) });
+  const data = {
+    type: "answer",
+    code: code,
+    q1_visit_date: form.q1_visit_date.value,
+    q2_age: form.q2_age.value,
+    q3_source: Array.from(form.querySelectorAll('input[name="q3_source"]:checked')).map(e=>e.value),
+    q4_satisfaction: form.q4_satisfaction.value,
+    q5_comment: form.q5_comment.value
+  };
 
-      new bootstrap.Modal(document.getElementById("completionModal")).show();
-    }
+  await fetch(GAS_URL, { method: "POST", body: JSON.stringify(data) });
 
-    // ▼ ブラウザ閉鎖処理
-    function closeBrowser() {
-      window.open('', '_self').close();
-    }
-  </script>
+  const modal = new bootstrap.Modal(document.getElementById('completionModal'));
+  modal.show();
+}
+
+// --- 戻るボタン機能 ---
+function confirmExit() {
+  if (confirm("アンケートを終了してブラウザを閉じます。よろしいですか？")) {
+    closeBrowser();
+  }
+}
+
+// --- 終了処理 ---
+function closeBrowser() {
+  // 通常のwindow.close()はタブ起動元制約があるため、複数方法を併用
+  window.open('about:blank', '_self');
+  window.close();
+  setTimeout(() => {
+    document.body.innerHTML = "<div style='text-align:center;padding-top:50px;'>ブラウザを終了してください。</div>";
+  }, 500);
+}
+</script>
+
 </body>
 </html>
-
