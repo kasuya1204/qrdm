@@ -13,13 +13,30 @@ body {
   background-color: #f8f9fa;
 }
 .header-bg { background-color: #007bff; color: white; }
-.container-hero { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 5rem 0; }
+.container-hero { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 5rem 1rem; /* スマホ用に左右padding調整 */ }
 .form-card {
   background-color: white; padding: 2rem; border-radius: 15px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); max-width: 600px; width: 100%;
 }
 .btn-pill { border-radius: 50rem; padding-left: 1.5rem; padding-right: 1.5rem; }
 .text-error { color: #dc3545; font-size: 0.875em; }
+
+/* --- バリデーションエラー用スタイル --- */
+.form-control.is-invalid,
+.form-label.is-invalid { /* Q2, Q3, Q4 のラベル用 */
+  color: #dc3545;
+}
+.form-control.is-invalid {
+   border-color: #dc3545;
+}
+.form-control.is-invalid:focus {
+  box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+}
+/* ラジオボタンやチェックボックスのis-invalidは直接効かないため、ラベルで代替 */
+.form-label.is-invalid {
+  font-weight: bold;
+}
+
 </style>
 </head>
 <body>
@@ -31,15 +48,15 @@ body {
 <main class="container-hero">
   <div class="form-card">
     <h2 class="text-center mb-4" style="color:#007bff;">サービスについてのアンケート</h2>
-    <form id="surveyForm" onsubmit="return submitSurvey(event)">
+    <form id="surveyForm" onsubmit="return submitSurvey(event)" novalidate>
       
       <div class="mb-4">
         <label for="q1_visit_date" class="form-label fw-bold">Q1. ご来店日はいつですか <span class="text-error">*必須</span></label>
-        <input type="date" class="form-control" id="q1_visit_date" required>
+        <input type="date" class="form-control" id="q1_visit_date">
       </div>
 
       <div class="mb-4">
-        <label class="form-label fw-bold">Q2. ご年齢 <span class="text-error">*必須</span></label>
+        <label class="form-label fw-bold" id="q2_label">Q2. ご年齢 <span class="text-error">*必須</span></label>
         <div class="d-flex flex-wrap">
           <div class="form-check me-3"><input class="form-check-input" type="radio" name="q2_age" value="10代"><label class="form-check-label">10代</label></div>
           <div class="form-check me-3"><input class="form-check-input" type="radio" name="q2_age" value="20代"><label class="form-check-label">20代</label></div>
@@ -50,7 +67,7 @@ body {
       </div>
 
       <div class="mb-4">
-        <label class="form-label fw-bold">Q3. サービスを知ったきっかけ（複数回答可） <span class="text-error">*必須</span></label>
+        <label class="form-label fw-bold" id="q3_label">Q3. サービスを知ったきっかけ（複数回答可） <span class="text-error">*必須</span></label>
         <div class="d-flex flex-column">
           <label><input type="checkbox" name="q3_source" value="家族・友人"> 家族・友人</label>
           <label><input type="checkbox" name="q3_source" value="TVCM"> TVCM</label>
@@ -61,13 +78,13 @@ body {
       </div>
 
       <div class="mb-4">
-        <label class="form-label fw-bold">Q4. サービスの満足度（1～5） <span class="text-error">*必須</span></label>
-        <div class="d-flex justify-content-between">
-          <label><input type="radio" name="q4_satisfaction" value="1">1😢</label>
-          <label><input type="radio" name="q4_satisfaction" value="2">2😅</label>
-          <label><input type="radio" name="q4_satisfaction" value="3">3😐</label>
-          <label><input type="radio" name="q4_satisfaction" value="4">4😀</label>
-          <label><input type="radio" name="q4_satisfaction" value="5">5😆</label>
+        <label class="form-label fw-bold" id="q4_label">Q4. サービスの満足度（1～5） <span class="text-error">*必須</span></label>
+        <div class="d-flex justify-content-between flex-wrap"> <!-- スマホ用にwrap追加 -->
+          <label class="m-1"><input type="radio" name="q4_satisfaction" value="1">1😢</label>
+          <label class="m-1"><input type="radio" name="q4_satisfaction" value="2">2😅</label>
+          <label class="m-1"><input type="radio" name="q4_satisfaction" value="3">3😐</label>
+          <label class="m-1"><input type="radio" name="q4_satisfaction" value="4">4😀</label>
+          <label class="m-1"><input type="radio" name="q4_satisfaction" value="5">5😆</label>
         </div>
       </div>
 
@@ -78,13 +95,40 @@ body {
 
       <div class="text-center">
         <button type="button" class="btn btn-outline-secondary btn-pill me-2" onclick="confirmExit()">戻る</button>
-        <button type="submit" class="btn btn-primary btn-pill">回答</button>
+        <button type="submit" class="btn btn-primary btn-pill" id="submitButton">回答</button>
       </div>
     </form>
   </div>
 </main>
 
-<!-- 回答完了モーダル -->
+<!-- 回答済みモーダル (新規追加) -->
+<div class="modal fade" id="alreadyAnsweredModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-warning text-dark"><h5 class="modal-title">確認</h5></div>
+      <div class="modal-body text-center py-5">
+        <p class="h5 mb-4">既にアンケート回答済みの為、<br>終了いたします。</p>
+        <button type="button" class="btn btn-primary btn-pill mt-3" onclick="closeBrowser()">終了</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- バリデーションエラーモーダル (新規追加) -->
+<div class="modal fade" id="validationErrorModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white"><h5 class="modal-title">入力エラー</h5></div>
+      <div class="modal-body text-center py-4">
+        <p class="h5 mb-3" id="validationErrorMessage">必須項目が未入力です。</p>
+        <button type="button" class="btn btn-secondary btn-pill" data-bs-dismiss="modal">閉じる</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- 回答完了モーダル (既存) -->
 <div class="modal fade" id="completionModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
@@ -111,38 +155,123 @@ const GAS_URL = "https://script.google.com/macros/s/AKfycbzbLbqwIO3JP4tYnYeZP48v
 // --- パラメータ取得（例：?12345） ---
 const code = window.location.search.replace("?", "") || "00000";
 
-// --- アクセス記録 ---
+// --- モーダルインスタンスの準備 ---
+let validationErrorModal;
+document.addEventListener('DOMContentLoaded', function () {
+    if (document.getElementById('validationErrorModal')) {
+        validationErrorModal = new bootstrap.Modal(document.getElementById('validationErrorModal'));
+    }
+});
+
+
+// --- アクセス記録 & 回答済みチェック ---
 window.onload = async function() {
   let ip = "取得不可", lat = "", lon = "";
   try {
     const ipRes = await fetch("https://api.ipify.org?format=json");
     ip = (await ipRes.json()).ip;
   } catch(e){}
+  
+  // 位置情報を取得試行
   navigator.geolocation.getCurrentPosition(
-    pos => sendAccess(ip, pos.coords.latitude, pos.coords.longitude),
-    ()  => sendAccess(ip, lat, lon)
+    pos => checkStatusAndLog(ip, pos.coords.latitude, pos.coords.longitude),
+    ()  => checkStatusAndLog(ip, lat, lon) // 位置情報が取れなくても実行
   );
 };
 
-function sendAccess(ip, lat, lon) {
-  fetch(GAS_URL, {
-    method: "POST",
-    body: JSON.stringify({
-      type: "access",
-      code: code,
-      ip: ip,
-      lat: lat,
-      lon: lon,
-      device: navigator.userAgent
-    })
-  });
+// GASに状態確認とアクセスログ送信を依頼する
+async function checkStatusAndLog(ip, lat, lon) {
+  try {
+    const response = await fetch(GAS_URL, {
+      method: "POST",
+      // タイムアウトを設ける（例：8秒）
+      signal: AbortSignal.timeout(8000), 
+      body: JSON.stringify({
+        type: "access",
+        code: code,
+        ip: ip,
+        lat: lat,
+        lon: lon,
+        device: navigator.userAgent
+      })
+    });
+    
+    const result = await response.json(); // {status: "answered"} または {status: "logged"}
+
+    if (result.status === "answered") {
+      // 回答済みの場合
+      const modal = new bootstrap.Modal(document.getElementById('alreadyAnsweredModal'));
+      modal.show();
+    } 
+    // "logged" の場合は、GAS側でログが記録され、アンケートに進む（何もしない）
+
+  } catch (e) {
+    // ネットワークエラーやタイムアウトの場合
+    // 回答済みチェックができなかったが、アンケートは続行させる
+    console.warn("Could not check status, proceeding anyway.", e);
+  }
 }
 
-// --- 回答処理 ---
+
+// --- 回答処理（バリデーション強化） ---
 async function submitSurvey(event) {
   event.preventDefault();
   const form = event.target;
+  let firstErrorElement = null;
 
+  // バリデーションエラーメッセージをリセット
+  form.q1_visit_date.classList.remove('is-invalid');
+  document.getElementById('q2_label').classList.remove('is-invalid');
+  document.getElementById('q3_label').classList.remove('is-invalid');
+  document.getElementById('q4_label').classList.remove('is-invalid');
+
+
+  // Q1. ご来店日
+  if (!form.q1_visit_date.value) {
+    form.q1_visit_date.classList.add('is-invalid');
+    if (!firstErrorElement) firstErrorElement = form.q1_visit_date;
+  }
+
+  // Q2. ご年齢
+  if (!form.q2_age.value) {
+    const q2Label = document.getElementById('q2_label');
+    q2Label.classList.add('is-invalid'); 
+    if (!firstErrorElement) firstErrorElement = q2Label;
+  }
+
+  // Q3. きっかけ
+  if (form.querySelectorAll('input[name="q3_source"]:checked').length === 0) {
+    const q3Label = document.getElementById('q3_label');
+    q3Label.classList.add('is-invalid');
+    if (!firstErrorElement) firstErrorElement = q3Label;
+  }
+
+  // Q4. 満足度
+  if (!form.q4_satisfaction.value) {
+    const q4Label = document.getElementById('q4_label');
+    q4Label.classList.add('is-invalid');
+    if (!firstErrorElement) firstErrorElement = q4Label;
+  }
+
+  // エラーがある場合
+  if (firstErrorElement) {
+    // エラーモーダルを表示
+    const errorMessage = document.getElementById('validationErrorMessage');
+    errorMessage.textContent = '必須項目（*）が未入力です。';
+    if(validationErrorModal) validationErrorModal.show();
+    
+    // エラー箇所へスクロール
+    firstErrorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return; // 送信処理を中断
+  }
+  
+  // ローディング表示
+  const submitButton = document.getElementById('submitButton');
+  submitButton.disabled = true;
+  submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 送信中...';
+
+
+  // バリデーション通過後
   const data = {
     type: "answer",
     code: code,
@@ -153,10 +282,27 @@ async function submitSurvey(event) {
     q5_comment: form.q5_comment.value
   };
 
-  await fetch(GAS_URL, { method: "POST", body: JSON.stringify(data) });
+  try {
+    await fetch(GAS_URL, { 
+        method: "POST", 
+        body: JSON.stringify(data),
+        signal: AbortSignal.timeout(10000) // 送信タイムアウト
+    });
 
-  const modal = new bootstrap.Modal(document.getElementById('completionModal'));
-  modal.show();
+    const modal = new bootstrap.Modal(document.getElementById('completionModal'));
+    modal.show();
+
+  } catch (e) {
+    // 送信失敗時
+    console.error("Submit failed:", e);
+    const errorMessage = document.getElementById('validationErrorMessage');
+    errorMessage.textContent = '送信に失敗しました。ネットワーク接続を確認して再度お試しください。';
+    if(validationErrorModal) validationErrorModal.show();
+  } finally {
+    // ボタンを元に戻す
+    submitButton.disabled = false;
+    submitButton.innerHTML = '回答';
+  }
 }
 
 // --- 戻るボタン機能 ---
@@ -168,11 +314,10 @@ function confirmExit() {
 
 // --- 終了処理 ---
 function closeBrowser() {
-  // 通常のwindow.close()はタブ起動元制約があるため、複数方法を併用
   window.open('about:blank', '_self');
   window.close();
   setTimeout(() => {
-    document.body.innerHTML = "<div style='text-align:center;padding-top:50px;'>ブラウザを終了してください。</div>";
+    document.body.innerHTML = "<div style='text-align:center;padding-top:50px; font-family: sans-serif;'>ブラウザを終了してください。</div>";
   }, 500);
 }
 </script>
