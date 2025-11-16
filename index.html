@@ -22,19 +22,17 @@ body {
 .text-error { color: #dc3545; font-size: 0.875em; }
 
 /* --- バリデーションエラー用スタイル --- */
-.form-control.is-invalid,
-.form-label.is-invalid { /* Q2, Q3, Q4 のラベル用 */
-  color: #dc3545;
-}
-.form-control.is-invalid {
+.form-control.is-invalid { /* input要素のエラー枠線 */
    border-color: #dc3545;
 }
 .form-control.is-invalid:focus {
   box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
 }
-/* ラジオボタンやチェックボックスのis-invalidは直接効かないため、ラベルで代替 */
-.form-label.is-invalid {
-  font-weight: bold;
+
+/* 「未回答」メッセージ用のスタイル */
+.validation-message {
+    font-size: 0.9em;
+    font-weight: bold;
 }
 
 </style>
@@ -50,14 +48,22 @@ body {
     <h2 class="text-center mb-4" style="color:#007bff;">サービスについてのアンケート</h2>
     <form id="surveyForm" onsubmit="return submitSurvey(event)" novalidate>
       
+      <!-- Q1 -->
       <div class="mb-4">
-        <label for="q1_visit_date" class="form-label fw-bold">Q1. ご来店日はいつですか <span class="text-error">*必須</span></label>
-        <input type="date" class="form-control" id="q1_visit_date">
+        <div class="d-flex align-items-center">
+          <label for="q1_visit_date" class="form-label fw-bold mb-0">Q1. ご来店日はいつですか <span class="text-error">*必須</span></label>
+          <span class="text-danger ms-2 d-none validation-message" id="q1_error">未回答</span>
+        </div>
+        <input type="date" class="form-control mt-1" id="q1_visit_date">
       </div>
 
+      <!-- Q2 -->
       <div class="mb-4">
-        <label class="form-label fw-bold" id="q2_label">Q2. ご年齢 <span class="text-error">*必須</span></label>
-        <div class="d-flex flex-wrap">
+        <div class="d-flex align-items-center">
+          <label class="form-label fw-bold mb-0" id="q2_label">Q2. ご年齢 <span class="text-error">*必須</span></label>
+          <span class="text-danger ms-2 d-none validation-message" id="q2_error">未回答</span>
+        </div>
+        <div class="d-flex flex-wrap mt-1">
           <div class="form-check me-3"><input class="form-check-input" type="radio" name="q2_age" value="10代"><label class="form-check-label">10代</label></div>
           <div class="form-check me-3"><input class="form-check-input" type="radio" name="q2_age" value="20代"><label class="form-check-label">20代</label></div>
           <div class="form-check me-3"><input class="form-check-input" type="radio" name="q2_age" value="30代"><label class="form-check-label">30代</label></div>
@@ -66,9 +72,13 @@ body {
         </div>
       </div>
 
+      <!-- Q3 -->
       <div class="mb-4">
-        <label class="form-label fw-bold" id="q3_label">Q3. サービスを知ったきっかけ（複数回答可） <span class="text-error">*必須</span></label>
-        <div class="d-flex flex-column">
+        <div class="d-flex align-items-center">
+           <label class="form-label fw-bold mb-0" id="q3_label">Q3. サービスを知ったきっかけ（複数回答可） <span class="text-error">*必須</span></label>
+           <span class="text-danger ms-2 d-none validation-message" id="q3_error">未回答</span>
+        </div>
+        <div class="d-flex flex-column mt-1">
           <label><input type="checkbox" name="q3_source" value="家族・友人"> 家族・友人</label>
           <label><input type="checkbox" name="q3_source" value="TVCM"> TVCM</label>
           <label><input type="checkbox" name="q3_source" value="SNS"> SNS</label>
@@ -77,9 +87,13 @@ body {
         </div>
       </div>
 
+      <!-- Q4 -->
       <div class="mb-4">
-        <label class="form-label fw-bold" id="q4_label">Q4. サービスの満足度（1～5） <span class="text-error">*必須</span></label>
-        <div class="d-flex justify-content-between flex-wrap"> <!-- スマホ用にwrap追加 -->
+        <div class="d-flex align-items-center">
+          <label class="form-label fw-bold mb-0" id="q4_label">Q4. サービスの満足度（1～5） <span class="text-error">*必須</span></label>
+          <span class="text-danger ms-2 d-none validation-message" id="q4_error">未回答</span>
+        </div>
+        <div class="d-flex justify-content-between flex-wrap mt-1"> <!-- スマホ用にwrap追加 -->
           <label class="m-1"><input type="radio" name="q4_satisfaction" value="1">1😢</label>
           <label class="m-1"><input type="radio" name="q4_satisfaction" value="2">2😅</label>
           <label class="m-1"><input type="radio" name="q4_satisfaction" value="3">3😐</label>
@@ -88,6 +102,7 @@ body {
         </div>
       </div>
 
+      <!-- Q5 -->
       <div class="mb-4">
         <label for="q5_comment" class="form-label fw-bold">Q5. ご意見・ご要望（任意）</label>
         <textarea class="form-control" id="q5_comment" rows="4"></textarea>
@@ -101,7 +116,7 @@ body {
   </div>
 </main>
 
-<!-- 回答済みモーダル (新規追加) -->
+<!-- 回答済みモーダル (既存) -->
 <div class="modal fade" id="alreadyAnsweredModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
@@ -114,14 +129,33 @@ body {
   </div>
 </div>
 
-<!-- バリデーションエラーモーダル (新規追加) -->
+<!-- バリデーションエラーモーダル (既存) -->
 <div class="modal fade" id="validationErrorModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
-      <div class="modal-header bg-danger text-white"><h5 class="modal-title">入力エラー</h5></div>
+      <div class="modal-header bg-danger text-white"><h5 class="modal-title">回答確認</h5></div>
       <div class="modal-body text-center py-4">
-        <p class="h5 mb-3" id="validationErrorMessage">必須項目が未入力です。</p>
+        <p class="h5 mb-3" id="validationErrorMessage">未回答必須項目があります。</p>
         <button type="button" class="btn btn-secondary btn-pill" data-bs-dismiss="modal">閉じる</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 戻る確認モーダル (新規追加) -->
+<div class="modal fade" id="confirmExitModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">確認</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center py-4">
+        <p class="h5 mb-0">今までの回答が無効になりますが<br>宜しいですか？</p>
+      </div>
+      <div class="modal-footer justify-content-center">
+        <button type="button" class="btn btn-secondary btn-pill" data-bs-dismiss="modal">キャンセル</button>
+        <button type="button" class="btn btn-primary btn-pill" onclick="closeBrowser()">終了する</button>
       </div>
     </div>
   </div>
@@ -157,9 +191,13 @@ const code = window.location.search.replace("?", "") || "00000";
 
 // --- モーダルインスタンスの準備 ---
 let validationErrorModal;
+let confirmExitModal; // 戻る確認モーダル用
 document.addEventListener('DOMContentLoaded', function () {
     if (document.getElementById('validationErrorModal')) {
         validationErrorModal = new bootstrap.Modal(document.getElementById('validationErrorModal'));
+    }
+    if (document.getElementById('confirmExitModal')) { // 追加
+        confirmExitModal = new bootstrap.Modal(document.getElementById('confirmExitModal'));
     }
 });
 
@@ -221,35 +259,39 @@ async function submitSurvey(event) {
 
   // バリデーションエラーメッセージをリセット
   form.q1_visit_date.classList.remove('is-invalid');
-  document.getElementById('q2_label').classList.remove('is-invalid');
-  document.getElementById('q3_label').classList.remove('is-invalid');
-  document.getElementById('q4_label').classList.remove('is-invalid');
+  document.getElementById('q1_error').classList.add('d-none');
+  document.getElementById('q2_error').classList.add('d-none');
+  document.getElementById('q3_error').classList.add('d-none');
+  document.getElementById('q4_error').classList.add('d-none');
+
+  // Q2, Q3, Q4 のラベル要素を取得 (スクロールターゲット用)
+  const q2Label = document.getElementById('q2_label');
+  const q3Label = document.getElementById('q3_label');
+  const q4Label = document.getElementById('q4_label');
 
 
   // Q1. ご来店日
   if (!form.q1_visit_date.value) {
-    form.q1_visit_date.classList.add('is-invalid');
+    form.q1_visit_date.classList.add('is-invalid'); // input枠線を赤くする
+    document.getElementById('q1_error').classList.remove('d-none'); // 「未回答」表示
     if (!firstErrorElement) firstErrorElement = form.q1_visit_date;
   }
 
   // Q2. ご年齢
   if (!form.q2_age.value) {
-    const q2Label = document.getElementById('q2_label');
-    q2Label.classList.add('is-invalid'); 
-    if (!firstErrorElement) firstErrorElement = q2Label;
+    document.getElementById('q2_error').classList.remove('d-none'); // 「未回答」表示
+    if (!firstErrorElement) firstErrorElement = q2Label; // スクロールターゲットはラベル
   }
 
   // Q3. きっかけ
   if (form.querySelectorAll('input[name="q3_source"]:checked').length === 0) {
-    const q3Label = document.getElementById('q3_label');
-    q3Label.classList.add('is-invalid');
+    document.getElementById('q3_error').classList.remove('d-none'); // 「未回答」表示
     if (!firstErrorElement) firstErrorElement = q3Label;
   }
 
   // Q4. 満足度
   if (!form.q4_satisfaction.value) {
-    const q4Label = document.getElementById('q4_label');
-    q4Label.classList.add('is-invalid');
+    document.getElementById('q4_error').classList.remove('d-none'); // 「未回答」表示
     if (!firstErrorElement) firstErrorElement = q4Label;
   }
 
@@ -257,7 +299,7 @@ async function submitSurvey(event) {
   if (firstErrorElement) {
     // エラーモーダルを表示
     const errorMessage = document.getElementById('validationErrorMessage');
-    errorMessage.textContent = '必須項目（*）が未入力です。';
+    errorMessage.textContent = '未回答必須項目があります。';
     if(validationErrorModal) validationErrorModal.show();
     
     // エラー箇所へスクロール
@@ -307,8 +349,8 @@ async function submitSurvey(event) {
 
 // --- 戻るボタン機能 ---
 function confirmExit() {
-  if (confirm("アンケートを終了してブラウザを閉じます。よろしいですか？")) {
-    closeBrowser();
+  if (confirmExitModal) {
+    confirmExitModal.show();
   }
 }
 
